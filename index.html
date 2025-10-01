@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Isotopic Studios</title>
+
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts for a futuristic feel -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Custom styles and animations */
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background-color: #0D1117; /* A very dark, near-black color */
+            overflow: hidden; /* Hide scrollbars */
+        }
+
+        /* Animation to flip the main title into view */
+        @keyframes flip-in {
+            from {
+                transform: perspective(1000px) rotateX(90deg);
+                opacity: 0;
+            }
+            to {
+                transform: perspective(1000px) rotateX(0deg);
+                opacity: 1;
+            }
+        }
+
+        .title-animation {
+            animation: flip-in 1.5s cubic-bezier(0.25, 1, 0.5, 1) 0.5s 1 forwards;
+            opacity: 0; /* Start as invisible */
+        }
+
+        /* Animation for a subtle pulse on the button */
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 10px 0px rgba(0, 191, 255, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 25px 5px rgba(0, 191, 255, 0.7);
+            }
+        }
+
+        .cta-button {
+            animation: pulse 3s infinite;
+        }
+
+        /* A subtle background grid pattern */
+        .grid-background {
+            background-image:
+                    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+    </style>
+</head>
+<body class="text-white">
+
+<div class="grid-background min-h-screen w-full flex flex-col items-center justify-center text-center p-4">
+
+    <!-- Main Content Container -->
+    <div class="relative z-10">
+        <!-- Company Title with Animation -->
+        <h1 class="text-5xl md:text-7xl lg:text-8xl font-bold uppercase tracking-widest title-animation">
+            <span class="text-cyan-400">Isotopic</span> Studios
+        </h1>
+
+        <!-- Subtitle -->
+        <p class="mt-4 text-lg md:text-xl text-gray-400 opacity-0 title-animation" style="animation-delay: 1s;">
+            Bending the rules of reality.
+        </p>
+
+        <!-- Link to the game's website -->
+        <div class="mt-12 opacity-0 title-animation" style="animation-delay: 1.5s;">
+            <a href="https://www.paradoxgame.co.uk/"
+            class="cta-button inline-block bg-cyan-500 text-gray-900 font-bold uppercase tracking-wider px-8 py-4 rounded-lg shadow-lg transition-transform transform hover:scale-105 hover:bg-cyan-400 focus:outline-none focus:ring-4 focus:ring-cyan-300">
+            Enter The Paradox
+            </a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="absolute bottom-4 text-gray-500 text-sm">
+        &copy; 2025 Isotopic Studios. All rights reserved.
+    </footer>
+
+</div>
+
+</body>
+</html>
