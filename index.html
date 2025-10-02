@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Isotopic Studios</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="512Icon.png">
 
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -21,6 +23,27 @@
             overflow: hidden; /* Hide scrollbars */
         }
 
+        #particle-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0; /* Place canvas behind content */
+        }
+
+        /* Animation to fade and float in */
+        @keyframes fade-float-in {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
         /* Animation to flip the main title into view */
         @keyframes flip-in {
             from {
@@ -33,9 +56,15 @@
             }
         }
 
-        .title-animation {
-            animation: flip-in 1.5s cubic-bezier(0.25, 1, 0.5, 1) 0.5s 1 forwards;
+        /* Base class for items that will be animated */
+        .animated-item {
             opacity: 0; /* Start as invisible */
+            animation: fade-float-in 1.5s cubic-bezier(0.25, 1, 0.5, 1) 1 forwards;
+        }
+
+        .title-animation {
+            opacity: 0;
+            animation: flip-in 1.5s cubic-bezier(0.25, 1, 0.5, 1) 1 forwards;
         }
 
         /* Animation for a subtle pulse on the button */
@@ -51,47 +80,147 @@
         .cta-button {
             animation: pulse 3s infinite;
         }
-
-        /* A subtle background grid pattern */
-        .grid-background {
-            background-image:
-                    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-            background-size: 50px 50px;
-        }
     </style>
 </head>
 <body class="text-white">
 
-<div class="grid-background min-h-screen w-full flex flex-col items-center justify-center text-center p-4">
+<!-- Canvas for particle background -->
+<canvas id="particle-canvas"></canvas>
+
+<div class="min-h-screen w-full flex flex-col items-center justify-center text-center p-4 relative z-10">
 
     <!-- Main Content Container -->
-    <div class="relative z-10">
+    <div>
+        <!-- Game Icon -->
+        <img src="512Icon.png" alt="Paradox Game Icon" class="w-32 h-32 mx-auto mb-6 rounded-3xl shadow-lg animated-item" style="animation-delay: 0.2s;">
+
         <!-- Company Title with Animation -->
-        <h1 class="text-5xl md:text-7xl lg:text-8xl font-bold uppercase tracking-widest title-animation">
+        <h1 class="text-5xl md:text-7xl lg:text-8xl font-bold uppercase tracking-widest title-animation" style="animation-delay: 0.5s;">
             <span class="text-cyan-400">Isotopic</span> Studios
         </h1>
 
         <!-- Subtitle -->
-        <p class="mt-4 text-lg md:text-xl text-gray-400 opacity-0 title-animation" style="animation-delay: 1s;">
+        <p class="mt-4 text-lg md:text-xl text-gray-400 animated-item" style="animation-delay: 1.2s;">
             Bending the rules of reality.
         </p>
 
         <!-- Link to the game's website -->
-        <div class="mt-12 opacity-0 title-animation" style="animation-delay: 1.5s;">
-            <a href="https://www.paradoxgame.co.uk/"
-            class="cta-button inline-block bg-cyan-500 text-gray-900 font-bold uppercase tracking-wider px-8 py-4 rounded-lg shadow-lg transition-transform transform hover:scale-105 hover:bg-cyan-400 focus:outline-none focus:ring-4 focus:ring-cyan-300">
-            Enter The Paradox
+        <div class="mt-12 animated-item" style="animation-delay: 1.7s;">
+            <a href="https://www. paradoxgame.co.uk/"
+               target="_blank" rel="noopener noreferrer"
+               class="cta-button inline-block bg-cyan-500 text-gray-900 font-bold uppercase tracking-wider px-8 py-4 rounded-lg shadow-lg transition-transform transform hover:scale-105 hover:bg-cyan-400 focus:outline-none focus:ring-4 focus:ring-cyan-300">
+                Enter The Paradox
             </a>
+        </div>
+
+        <!-- Contact Info -->
+        <div class="mt-10 text-gray-400 animated-item" style="animation-delay: 2.2s;">
+            <p>Contact us:
+                <a href="mailto:tamairapps.isotopicstudios@gmail.com" class="text-cyan-400 hover:text-cyan-300 transition-colors">
+                    tamairapps.isotopicstudios@gmail.com
+                </a>
+            </p>
         </div>
     </div>
 
     <!-- Footer -->
     <footer class="absolute bottom-4 text-gray-500 text-sm">
-        &copy; 2025 Isotopic Studios. All rights reserved.
+        &copy; 2024 Isotopic Studios. All rights reserved.
     </footer>
 
 </div>
 
+<script>
+    // --- Particle Background Script ---
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let particlesArray;
+
+    class Particle {
+        constructor(x, y, directionX, directionY, size, color) {
+            this.x = x;
+            this.y = y;
+            this.directionX = directionX;
+            this.directionY = directionY;
+            this.size = size;
+            this.color = color;
+        }
+
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+            ctx.fillStyle = 'rgba(0, 191, 255, 0.3)';
+            ctx.fill();
+        }
+
+        update() {
+            if (this.x > canvas.width || this.x < 0) {
+                this.directionX = -this.directionX;
+            }
+            if (this.y > canvas.height || this.y < 0) {
+                this.directionY = -this.directionY;
+            }
+            this.x += this.directionX;
+            this.y += this.directionY;
+            this.draw();
+        }
+    }
+
+    function init() {
+        particlesArray = [];
+        let numberOfParticles = (canvas.height * canvas.width) / 9000;
+        for (let i = 0; i < numberOfParticles; i++) {
+            let size = (Math.random() * 2) + 1;
+            let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
+            let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
+            let directionX = (Math.random() * 0.4) - 0.2;
+            let directionY = (Math.random() * 0.4) - 0.2;
+            particlesArray.push(new Particle(x, y, directionX, directionY, size));
+        }
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        ctx.clearRect(0, 0, innerWidth, innerHeight);
+        for (let i = 0; i < particlesArray.length; i++) {
+            particlesArray[i].update();
+        }
+        connect();
+    }
+
+    function connect() {
+        let opacityValue = 1;
+        for (let a = 0; a < particlesArray.length; a++) {
+            for (let b = a; b < particlesArray.length; b++) {
+                let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x))
+                    + ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+                if (distance < (canvas.width / 7) * (canvas.height / 7)) {
+                    opacityValue = 1 - (distance / 20000);
+                    ctx.strokeStyle = 'rgba(0, 191, 255,' + opacityValue + ')';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                    ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                    ctx.stroke();
+                }
+            }
+        }
+    }
+
+    window.addEventListener('resize', () => {
+            canvas.width = innerWidth;
+            canvas.height = innerHeight;
+            init();
+        }
+    );
+
+    init();
+    animate();
+</script>
+
 </body>
 </html>
+
