@@ -57,7 +57,7 @@
 
         /* ---------- Hero ---------- */
         .hero { position: relative; min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; }
-        #particle-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
+        #hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
         .hero::after { content: ""; position: absolute; inset: auto 0 0 0; height: 160px; background: linear-gradient(transparent, var(--bg)); z-index: 1; }
         .hero-inner { position: relative; z-index: 2; padding: 96px 16px 64px; }
         .hero-logo { width: 120px; height: 120px; margin: 0 auto 28px; border-radius: 28px; box-shadow: 0 0 40px rgba(34, 211, 238, 0.25); }
@@ -198,7 +198,7 @@
 </nav>
 
 <header class="hero" id="top">
-    <canvas id="particle-canvas" aria-hidden="true"></canvas>
+    <canvas id="hero-canvas" aria-hidden="true"></canvas>
     <div class="hero-inner">
         <img class="hero-logo reveal" style="animation-delay:.1s" src="512Icon.png" alt="Isotopic Studios logo">
         <h1 class="reveal" style="animation-delay:.35s"><span>Isotopic</span> Studios</h1>
@@ -333,75 +333,128 @@
     }, { threshold: 0.12 });
     document.querySelectorAll('main .reveal').forEach(el => io.observe(el));
 
-    // --- Particle background (hero only) ---
-    const canvas = document.getElementById('particle-canvas');
+    // --- Hero background: drifting glow + orbiting atom ---
+    const canvas = document.getElementById("hero-canvas");
     const ctx = canvas.getContext('2d');
     const hero = document.querySelector('.hero');
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let particles = [];
-    let running = true;
+    let W = 0, H = 0, DPR = 1, running = true, t0 = performance.now();
+    let stars = [];
+    let mouse = { x: 0, y: 0, tx: 0, ty: 0 };
 
-    function size() {
-        canvas.width = hero.clientWidth;
-        canvas.height = hero.clientHeight;
-    }
+    // Three tilted orbits, like an atom diagram, each with its own speed and colour
+    const orbits = [
+        { tilt: 0,               speed: 0.55, color: [34, 211, 238], electrons: 2 },
+        { tilt: Math.PI / 3,     speed: -0.42, color: [167, 139, 250], electrons: 1 },
+        { tilt: 2 * Math.PI / 3, speed: 0.35, color: [56, 189, 248], electrons: 2 }
+    ];
+    const TRAIL = 46;
 
     function init() {
-        size();
-        particles = [];
-        const count = Math.min(160, (canvas.width * canvas.height) / 9000);
-        for (let i = 0; i < count; i++) {
-            particles.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                dx: Math.random() * 0.4 - 0.2,
-                dy: Math.random() * 0.4 - 0.2,
-                r: Math.random() * 2 + 1
-            });
+        DPR = Math.min(window.devicePixelRatio || 1, 2);
+        W = hero.clientWidth; H = hero.clientHeight;
+        canvas.width = W * DPR; canvas.height = H * DPR;
+        ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+        stars = [];
+        const n = Math.min(140, (W * H) / 9000);
+        for (let i = 0; i < n; i++) {
+            stars.push({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.2 + 0.3, p: Math.random() * Math.PI * 2, d: Math.random() * 0.6 + 0.2 });
         }
     }
 
-    function frame() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const maxDist = (canvas.width / 7) * (canvas.height / 7);
-        for (const p of particles) {
-            if (p.x > canvas.width || p.x < 0) p.dx = -p.dx;
-            if (p.y > canvas.height || p.y < 0) p.dy = -p.dy;
-            if (!reduceMotion) { p.x += p.dx; p.y += p.dy; }
+    function glow(x, y, r, rgb, a) {
+        const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+        g.addColorStop(0, `rgba(${rgb},${a})`);
+        g.addColorStop(1, `rgba(${rgb},0)`);
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // Point on a tilted ellipse that slowly precesses
+    function orbitPoint(o, angle, cx, cy, R, time) {
+        const rx = R, ry = R * 0.34;
+        const tilt = o.tilt + time * 0.05;
+        const x = Math.cos(angle) * rx, y = Math.sin(angle) * ry;
+        return [cx + x * Math.cos(tilt) - y * Math.sin(tilt), cy + x * Math.sin(tilt) + y * Math.cos(tilt)];
+    }
+
+    function frame(now) {
+        const time = reduceMotion ? 8 : (now - t0) / 1000;
+        ctx.clearRect(0, 0, W, H);
+
+        mouse.x += (mouse.tx - mouse.x) * 0.05;
+        mouse.y += (mouse.ty - mouse.y) * 0.05;
+
+        // Slow drifting colour glows
+        const big = Math.max(W, H);
+        glow(W * (0.25 + 0.08 * Math.sin(time * 0.13)), H * (0.3 + 0.08 * Math.cos(time * 0.11)), big * 0.55, '6,182,212', 0.16);
+        glow(W * (0.78 + 0.07 * Math.cos(time * 0.09)), H * (0.65 + 0.08 * Math.sin(time * 0.12)), big * 0.5, '139,92,246', 0.14);
+
+        // Twinkling stars with gentle parallax
+        for (const s of stars) {
+            const a = 0.25 + 0.35 * (0.5 + 0.5 * Math.sin(time * 1.5 + s.p));
+            ctx.fillStyle = `rgba(200,230,255,${a})`;
             ctx.beginPath();
-            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(0, 191, 255, 0.3)';
+            ctx.arc(s.x + mouse.x * 14 * s.d, s.y + mouse.y * 14 * s.d, s.r, 0, Math.PI * 2);
             ctx.fill();
         }
-        for (let a = 0; a < particles.length; a++) {
-            for (let b = a + 1; b < particles.length; b++) {
-                const dx = particles[a].x - particles[b].x, dy = particles[a].y - particles[b].y;
-                const d = dx * dx + dy * dy;
-                if (d < maxDist) {
-                    const o = 1 - d / 20000;
-                    if (o <= 0) continue;
-                    ctx.strokeStyle = 'rgba(0, 191, 255,' + o + ')';
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.moveTo(particles[a].x, particles[a].y);
-                    ctx.lineTo(particles[b].x, particles[b].y);
-                    ctx.stroke();
+
+        // Atom
+        const cx = W / 2 + mouse.x * 24, cy = H / 2 + mouse.y * 24;
+        const R = Math.min(W * 0.46, H * 0.52, 560);
+
+        ctx.lineWidth = 1.2;
+        for (const o of orbits) {
+            ctx.strokeStyle = `rgba(${o.color},0.16)`;
+            ctx.beginPath();
+            for (let i = 0; i <= 120; i++) {
+                const [x, y] = orbitPoint(o, (i / 120) * Math.PI * 2, cx, cy, R, time);
+                i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+            }
+            ctx.stroke();
+        }
+
+        // Nucleus
+        glow(cx, cy, R * 0.32, '34,211,238', 0.22);
+        const pulse = 1 + 0.06 * Math.sin(time * 2.2);
+        glow(cx, cy, R * 0.09 * pulse, '165,243,252', 0.55);
+
+        // Electrons with fading trails
+        for (const o of orbits) {
+            for (let e = 0; e < o.electrons; e++) {
+                const base = time * o.speed * 1.6 + (e * Math.PI * 2) / o.electrons + o.tilt;
+                const dir = Math.sign(o.speed);
+                for (let k = TRAIL; k >= 0; k--) {
+                    const [x, y] = orbitPoint(o, base - dir * k * 0.022, cx, cy, R, time);
+                    const f = 1 - k / TRAIL;
+                    ctx.fillStyle = `rgba(${o.color},${0.5 * f * f})`;
+                    ctx.beginPath(); ctx.arc(x, y, 1 + 2.2 * f, 0, Math.PI * 2); ctx.fill();
                 }
+                const [x, y] = orbitPoint(o, base, cx, cy, R, time);
+                glow(x, y, 18, o.color.join(','), 0.6);
+                ctx.fillStyle = '#fff';
+                ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fill();
             }
         }
+
         if (running && !reduceMotion) requestAnimationFrame(frame);
     }
 
-    // Pause the animation when the hero is off screen
+    window.addEventListener('pointermove', (e) => {
+        mouse.tx = (e.clientX / window.innerWidth - 0.5);
+        mouse.ty = (e.clientY / window.innerHeight - 0.5);
+    }, { passive: true });
+
+    // Pause when the hero is off screen
     new IntersectionObserver(([e]) => {
         const was = running;
         running = e.isIntersecting;
         if (running && !was && !reduceMotion) requestAnimationFrame(frame);
     }).observe(hero);
 
-    window.addEventListener('resize', init);
+    window.addEventListener('resize', () => { init(); if (reduceMotion) frame(performance.now()); });
     init();
-    frame();
+    requestAnimationFrame(frame);
 </script>
 
 </body>
