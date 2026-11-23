@@ -3,224 +3,406 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Isotopic Studios</title>
-    <!-- Favicon -->
+    <title>Isotopic Studios | Games &amp; Websites</title>
+    <meta name="description" content="Isotopic Studios is an indie studio making games and web apps. Home of Inversion: Paradox and Pub Crawl, the drunk-proof pub crawl game.">
     <link rel="icon" type="image/png" href="512Icon.png">
+    <meta property="og:title" content="Isotopic Studios | Games & Websites">
+    <meta property="og:description" content="Indie studio making games and web apps. Home of Inversion: Paradox and Pub Crawl.">
+    <meta property="og:image" content="https://isotopicstudios.co.uk/512Icon.png">
 
-    <!-- Tailwind CSS for styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Google Fonts for a futuristic feel -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* Custom styles and animations */
+        :root {
+            --bg: #0D1117;
+            --bg-2: #111827;
+            --card: #161B22;
+            --line: #263040;
+            --text: #E6EDF3;
+            --muted: #9AA4B2;
+            --cyan: #22D3EE;
+            --cyan-deep: #06B6D4;
+            --amber: #FBBF24;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
         body {
-            font-family: 'Exo 2', sans-serif;
-            background-color: #0D1117; /* A very dark, near-black color */
-            overflow: hidden; /* Hide scrollbars */
+            font-family: 'Exo 2', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
         }
+        a { color: inherit; }
+        img { max-width: 100%; display: block; }
+        .wrap { width: min(1120px, 100% - 32px); margin-inline: auto; }
 
-        #particle-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0; /* Place canvas behind content */
+        /* ---------- Nav ---------- */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+            background: rgba(13, 17, 23, 0.75);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(38, 48, 64, 0.6);
         }
+        nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+        .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; font-size: 15px; }
+        .brand img { width: 34px; height: 34px; border-radius: 8px; }
+        .brand span { color: var(--cyan); }
+        .nav-links { display: flex; gap: 28px; list-style: none; }
+        .nav-links a { text-decoration: none; color: var(--muted); font-weight: 600; font-size: 15px; transition: color .2s; }
+        .nav-links a:hover { color: var(--cyan); }
+        @media (max-width: 640px) { .nav-links { gap: 16px; } .nav-links li.hide-sm { display: none; } .brand .word { display: none; } }
 
-        /* Animation to fade and float in */
-        @keyframes fade-float-in {
-            from {
-                transform: translateY(20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+        /* ---------- Hero ---------- */
+        .hero { position: relative; min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; }
+        #particle-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
+        .hero::after { content: ""; position: absolute; inset: auto 0 0 0; height: 160px; background: linear-gradient(transparent, var(--bg)); z-index: 1; }
+        .hero-inner { position: relative; z-index: 2; padding: 96px 16px 64px; }
+        .hero-logo { width: 120px; height: 120px; margin: 0 auto 28px; border-radius: 28px; box-shadow: 0 0 40px rgba(34, 211, 238, 0.25); }
+        .hero h1 {
+            font-size: clamp(40px, 9vw, 104px); font-weight: 800; line-height: 1;
+            text-transform: uppercase; letter-spacing: 0.08em;
         }
+        .hero h1 span { color: var(--cyan); }
+        .tagline { margin-top: 18px; font-size: clamp(18px, 2.4vw, 22px); color: var(--muted); }
+        .tagline strong { color: var(--text); font-weight: 600; }
+        .hero-ctas { margin-top: 40px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
 
-        /* Animation to flip the main title into view */
-        @keyframes flip-in {
-            from {
-                transform: perspective(1000px) rotateX(90deg);
-                opacity: 0;
-            }
-            to {
-                transform: perspective(1000px) rotateX(0deg);
-                opacity: 1;
-            }
+        .btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 14px 26px; border-radius: 10px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.08em; font-size: 15px;
+            text-decoration: none; transition: transform .2s, background .2s, box-shadow .2s;
         }
-
-        /* Base class for items that will be animated */
-        .animated-item {
-            opacity: 0; /* Start as invisible */
-            animation: fade-float-in 1.5s cubic-bezier(0.25, 1, 0.5, 1) 1 forwards;
-        }
-
-        .title-animation {
-            opacity: 0;
-            animation: flip-in 1.5s cubic-bezier(0.25, 1, 0.5, 1) 1 forwards;
-        }
-
-        /* Animation for a subtle pulse on the button */
+        .btn:hover { transform: translateY(-2px); }
+        .btn-cyan { background: var(--cyan-deep); color: #071016; animation: pulse 3s infinite; }
+        .btn-cyan:hover { background: var(--cyan); }
+        .btn-ghost { border: 1px solid var(--line); color: var(--text); background: rgba(22, 27, 34, 0.6); }
+        .btn-ghost:hover { border-color: var(--cyan); }
+        .btn-amber { background: var(--amber); color: #111827; }
+        .btn-amber:hover { box-shadow: 0 0 24px rgba(251, 191, 36, 0.45); }
         @keyframes pulse {
-            0%, 100% {
-                box-shadow: 0 0 10px 0px rgba(0, 191, 255, 0.5);
-            }
-            50% {
-                box-shadow: 0 0 25px 5px rgba(0, 191, 255, 0.7);
-            }
+            0%, 100% { box-shadow: 0 0 10px 0 rgba(0, 191, 255, 0.5); }
+            50% { box-shadow: 0 0 25px 5px rgba(0, 191, 255, 0.7); }
         }
 
-        .cta-button {
-            animation: pulse 3s infinite;
+        /* ---------- Sections ---------- */
+        section { padding: 96px 0; }
+        .eyebrow { color: var(--cyan); font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; font-size: 13px; }
+        h2 { font-size: clamp(30px, 4.5vw, 46px); line-height: 1.1; font-weight: 800; margin-top: 10px; }
+        .lead { color: var(--muted); font-size: 18px; margin-top: 14px; max-width: 640px; }
+
+        /* What we do */
+        .pillars { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-top: 40px; }
+        .pillar { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 28px; }
+        .pillar .icon { width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; background: rgba(34, 211, 238, 0.12); color: var(--cyan); margin-bottom: 18px; }
+        .pillar h3 { font-size: 22px; }
+        .pillar p { color: var(--muted); margin-top: 8px; }
+
+        /* Pub Crawl feature */
+        .feature {
+            background: var(--bg-2); border: 1px solid #2b2a1f; border-radius: 24px;
+            display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 40px; padding: 48px; align-items: center;
+            position: relative; overflow: hidden;
+        }
+        .feature > *, .game > * { min-width: 0; }
+        .feature::before { content: ""; position: absolute; width: 420px; height: 420px; right: -120px; top: -120px; background: radial-gradient(circle, rgba(251, 191, 36, 0.18), transparent 70%); pointer-events: none; }
+        .badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(251, 191, 36, 0.12); color: var(--amber); border: 1px solid rgba(251, 191, 36, 0.35); padding: 6px 12px; border-radius: 999px; font-weight: 700; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
+        .badge .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--amber); animation: blink 1.6s infinite; }
+        @keyframes blink { 50% { opacity: 0.3; } }
+        .feature h2 { margin-top: 18px; }
+        .feature h2 .hl { color: var(--amber); }
+        .feature .lead { color: #C9D1D9; }
+        .ticks { list-style: none; margin-top: 24px; display: grid; gap: 10px; }
+        .ticks li { display: flex; gap: 12px; align-items: flex-start; font-size: 17px; }
+        .ticks li::before { content: ""; flex: none; width: 22px; height: 22px; margin-top: 2px; border-radius: 6px; background: var(--amber) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111827' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5L20 7'/%3E%3C/svg%3E") center/14px no-repeat; }
+        .prices { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 28px; max-width: 460px; }
+        .price { border: 1px solid #3a3526; border-radius: 14px; padding: 16px 18px; background: rgba(17, 24, 39, 0.7); }
+        .price .name { color: var(--muted); font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; }
+        .price .amt { font-size: 30px; font-weight: 800; color: var(--amber); line-height: 1.2; }
+        .price .per { color: var(--muted); font-size: 14px; }
+        .feature .ctas { margin-top: 28px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+        .domain { color: var(--muted); font-size: 15px; }
+        .domain b { color: var(--amber); }
+        .poster { width: 100%; height: auto; border-radius: 18px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); transform: rotate(2deg); position: relative; }
+        @media (max-width: 860px) {
+            .feature { grid-template-columns: minmax(0, 1fr); padding: 28px 20px; }
+            .poster { max-width: 360px; margin: 8px auto 0; transform: none; }
+        }
+
+        /* Games */
+        .game {
+            margin-top: 40px; background: var(--card); border: 1px solid var(--line); border-radius: 24px; overflow: hidden;
+            display: grid; grid-template-columns: 1.1fr 0.9fr;
+        }
+        .game-shot { position: relative; min-height: 300px; background: #000 url("assets/paradox-gameplay.jpg") center/cover; }
+        .game-body { padding: 36px; }
+        .game-head { display: flex; gap: 16px; align-items: center; }
+        .game-head img { width: 72px; height: 72px; border-radius: 16px; }
+        .game-head h3 { font-size: 28px; line-height: 1.1; }
+        .game-head .sub { color: var(--cyan); font-weight: 600; font-size: 15px; }
+        .game-body p { color: var(--muted); margin-top: 18px; }
+        .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+        .chip { font-size: 13px; font-weight: 600; color: var(--text); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; }
+        .stores { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; align-items: center; }
+        .stores img { height: 48px; width: auto; transition: transform .2s; }
+        .stores a:hover img { transform: translateY(-2px); }
+        .text-link { color: var(--cyan); font-weight: 700; text-decoration: none; }
+        .text-link:hover { text-decoration: underline; }
+        @media (max-width: 860px) { .game { grid-template-columns: minmax(0, 1fr); } .game-shot { min-height: 200px; aspect-ratio: 2.16; } .game-body { padding: 24px 20px; } }
+
+        .more-games {
+            margin-top: 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+            border: 1px dashed var(--line); border-radius: 16px; padding: 22px 26px;
+        }
+        .more-games p { color: var(--muted); }
+        .more-games strong { color: var(--text); }
+
+        /* Contact */
+        .contact { text-align: center; background: linear-gradient(180deg, transparent, rgba(34, 211, 238, 0.06)); }
+        .contact .lead { margin-inline: auto; }
+        .contact .ctas { margin-top: 32px; display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+        .mail { margin-top: 18px; color: var(--muted); word-break: break-word; }
+        .mail a { color: var(--cyan); text-decoration: none; }
+
+        footer { border-top: 1px solid var(--line); padding: 28px 0; color: #6B7280; font-size: 14px; }
+        footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+        footer a { color: #9AA4B2; text-decoration: none; }
+        footer a:hover { color: var(--cyan); }
+
+        /* Reveal on scroll */
+        .reveal { opacity: 0; transform: translateY(20px); transition: opacity .9s cubic-bezier(.25,1,.5,1), transform .9s cubic-bezier(.25,1,.5,1); }
+        .reveal.in { opacity: 1; transform: none; }
+        .hero .reveal { animation: fade-float-in 1.4s cubic-bezier(.25,1,.5,1) forwards; }
+        @keyframes fade-float-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+        @media (prefers-reduced-motion: reduce) {
+            .reveal, .hero .reveal { opacity: 1; transform: none; animation: none; transition: none; }
+            .btn-cyan, .badge .dot { animation: none; }
         }
     </style>
 </head>
-<body class="text-white">
+<body>
 
-<!-- Canvas for particle background -->
-<canvas id="particle-canvas"></canvas>
+<nav>
+    <div class="wrap">
+        <a class="brand" href="#top"><img src="512Icon.png" alt=""><span class="word"><span>Isotopic</span> Studios</span></a>
+        <ul class="nav-links">
+            <li class="hide-sm"><a href="#what">What we do</a></li>
+            <li><a href="#pub-crawl">Pub Crawl</a></li>
+            <li><a href="#games">Games</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </div>
+</nav>
 
-<div class="min-h-screen w-full flex flex-col items-center justify-center text-center p-4 relative z-10">
-
-    <!-- Main Content Container -->
-    <div>
-        <!-- Game Icon -->
-        <img src="512Icon.png" alt="Paradox Game Icon" class="w-32 h-32 mx-auto mb-6 rounded-3xl shadow-lg animated-item" style="animation-delay: 0.2s;">
-
-        <!-- Company Title with Animation -->
-        <h1 class="text-5xl md:text-7xl lg:text-8xl font-bold uppercase tracking-widest title-animation" style="animation-delay: 0.5s;">
-            <span class="text-cyan-400">Isotopic</span> Studios
-        </h1>
-
-        <!-- Subtitle -->
-        <p class="mt-4 text-lg md:text-xl text-gray-400 animated-item" style="animation-delay: 1.2s;">
-            Bending the rules of reality.
-        </p>
-
-        <!-- Link to the game's website -->
-        <div class="mt-12 animated-item" style="animation-delay: 1.7s;">
-            <a href="https://www.paradoxgame.co.uk/"
-               class="cta-button inline-block bg-cyan-500 text-gray-900 font-bold uppercase tracking-wider px-8 py-4 rounded-lg shadow-lg transition-transform transform hover:scale-105 hover:bg-cyan-400 focus:outline-none focus:ring-4 focus:ring-cyan-300">
-                Enter The Paradox
-            </a>
-        </div>
-
-        <!-- Contact Info -->
-        <div class="mt-10 text-gray-400 animated-item" style="animation-delay: 2.2s;">
-            <p>Contact us:
-                <a href="mailto:TamairApps@IsotopicStudios.co.uk" class="text-cyan-400 hover:text-cyan-300 transition-colors">
-                    TamairApps@IsotopicStudios.co.uk
-                </a>
-            </p>
+<header class="hero" id="top">
+    <canvas id="particle-canvas" aria-hidden="true"></canvas>
+    <div class="hero-inner">
+        <img class="hero-logo reveal" style="animation-delay:.1s" src="512Icon.png" alt="Isotopic Studios logo">
+        <h1 class="reveal" style="animation-delay:.35s"><span>Isotopic</span> Studios</h1>
+        <p class="tagline reveal" style="animation-delay:.8s">Bending the rules of reality. <strong>We make games and websites.</strong></p>
+        <div class="hero-ctas reveal" style="animation-delay:1.1s">
+            <a class="btn btn-cyan" href="#games">Play our games</a>
+            <a class="btn btn-ghost" href="#pub-crawl">Meet Pub Crawl</a>
         </div>
     </div>
+</header>
 
-    <!-- Footer -->
-    <footer class="absolute bottom-4 text-gray-500 text-sm">
-        &copy; 2024 Isotopic Studios. All rights reserved.
-    </footer>
+<main>
+    <!-- What we do -->
+    <section id="what">
+        <div class="wrap">
+            <div class="reveal">
+                <p class="eyebrow">What we do</p>
+                <h2>Small studio, real products.</h2>
+                <p class="lead">We design, build and run our own games and web apps, end to end. From pixel art puzzlers on the App Store to live web apps that hold up on a Saturday night.</p>
+            </div>
+            <div class="pillars">
+                <div class="pillar reveal">
+                    <div class="icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="4"/><path d="M6 12h4M8 10v4"/><circle cx="16" cy="11" r="1"/><circle cx="18" cy="13" r="1"/></svg></div>
+                    <h3>Games</h3>
+                    <p>Mobile and PC games built in Unity. Tight mechanics, clever puzzles and a lot of pixel cats.</p>
+                </div>
+                <div class="pillar reveal">
+                    <div class="icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 14l-2 2 2 2M16 14l2 2-2 2"/></svg></div>
+                    <h3>Websites &amp; web apps</h3>
+                    <p>Real-time web apps with live leaderboards, accounts and payments, designed mobile first and self-hosted.</p>
+                </div>
+                <div class="pillar reveal">
+                    <div class="icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg></div>
+                    <h3>Built to be used</h3>
+                    <p>Everything we ship gets played and tested by real groups first, then polished until it just works.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-</div>
+    <!-- Pub Crawl -->
+    <section id="pub-crawl" style="padding-top:24px">
+        <div class="wrap">
+            <div class="feature reveal">
+                <div style="position:relative">
+                    <span class="badge"><span class="dot"></span>Launching soon</span>
+                    <h2>Pub Crawl: your night out is now <span class="hl">a game.</span></h2>
+                    <p class="lead">A real-time pub crawl app for uni societies, stag and hen dos, and birthdays. Teams compete across every pub while a ref scores challenges live. Big buttons, high contrast, drunk-proof by design.</p>
+                    <ul class="ticks">
+                        <li>Teams plus a ref who scores on the fly</li>
+                        <li>Challenges and rules at every pub</li>
+                        <li>Live leaderboard and pub locations on everyone's phone</li>
+                    </ul>
+                    <div class="prices">
+                        <div class="price"><div class="name">Group</div><div class="amt">£9.99</div><div class="per">stag, hen &amp; mates</div></div>
+                        <div class="price"><div class="name">Society</div><div class="amt">£15</div><div class="per">uni societies &amp; big crawls</div></div>
+                    </div>
+                    <div class="ctas">
+                        <a class="btn btn-amber" href="mailto:TamairApps@IsotopicStudios.co.uk?subject=Pub%20Crawl%20early%20access">Get early access</a>
+                        <span class="domain">Coming to <b>pub-crawler.uk</b></span>
+                    </div>
+                </div>
+                <img class="poster" src="assets/pub-crawl-poster.jpg" alt="Pub Crawl poster: Your pub crawl is now a game. Teams plus a ref, challenges at every pub, live leaderboard." width="480" height="600" loading="lazy">
+            </div>
+        </div>
+    </section>
+
+    <!-- Games -->
+    <section id="games">
+        <div class="wrap">
+            <div class="reveal">
+                <p class="eyebrow">Games</p>
+                <h2>Play our games.</h2>
+                <p class="lead">Out now on iOS and Android, with more experiments over on itch.io.</p>
+            </div>
+
+            <article class="game reveal">
+                <div class="game-shot" role="img" aria-label="Inversion: Paradox gameplay screenshot"></div>
+                <div class="game-body">
+                    <div class="game-head">
+                        <img src="assets/paradox-icon.png" alt="Inversion: Paradox icon" width="72" height="72">
+                        <div>
+                            <h3>Inversion: Paradox</h3>
+                            <div class="sub">Temporal puzzle game</div>
+                        </div>
+                    </div>
+                    <p>Think in reverse. Cooperate with yourself. Try not to break time. Rewind to team up with your past selves, reform shattered glass bridges and flash-freeze lava, but whatever you do, don't touch yourself.</p>
+                    <div class="chips"><span class="chip">iOS</span><span class="chip">Android</span><span class="chip">Unity</span><span class="chip">Pixel art</span></div>
+                    <div class="stores">
+                        <a href="https://apps.apple.com/gb/app/inversion-paradox/id6751603254" target="_blank" rel="noopener"><img src="assets/appStore.png" alt="Download on the App Store" height="48"></a>
+                        <a href="https://play.google.com/store/apps/details?id=com.tamairapps.paradox&hl=en_GB" target="_blank" rel="noopener"><img src="assets/playstore.png" alt="Get it on Google Play" height="48"></a>
+                    </div>
+                    <p style="margin-top:16px"><a class="text-link" href="https://www.paradoxgame.co.uk/" target="_blank" rel="noopener">Visit the Paradox site &rarr;</a></p>
+                </div>
+            </article>
+
+            <div class="more-games reveal">
+                <p><strong>More games &amp; prototypes</strong><br>Jams, experiments and early builds live on our itch.io page.</p>
+                <a class="btn btn-ghost" href="https://radioactiveant7.itch.io" target="_blank" rel="noopener">Browse on itch.io</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" class="contact">
+        <div class="wrap reveal">
+            <p class="eyebrow">Contact</p>
+            <h2>Got an idea, a society, or a bug?</h2>
+            <p class="lead">Booking a crawl, feedback on a game, or a website you need building, drop us a line.</p>
+            <div class="ctas">
+                <a class="btn btn-cyan" href="mailto:TamairApps@IsotopicStudios.co.uk">Email us</a>
+                <a class="btn btn-ghost" href="https://github.com/TamairNV" target="_blank" rel="noopener">GitHub</a>
+            </div>
+            <p class="mail"><a href="mailto:TamairApps@IsotopicStudios.co.uk">TamairApps@IsotopicStudios.co.uk</a></p>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <div class="wrap">
+        <span>&copy; <span id="year">2026</span> Isotopic Studios. All rights reserved.</span>
+        <span><a href="https://www.paradoxgame.co.uk/">Paradox</a> &middot; <a href="#pub-crawl">Pub Crawl</a> &middot; <a href="https://radioactiveant7.itch.io">itch.io</a></span>
+    </div>
+</footer>
 
 <script>
-    // --- Particle Background Script ---
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Reveal sections on scroll
+    const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('main .reveal').forEach(el => io.observe(el));
+
+    // --- Particle background (hero only) ---
     const canvas = document.getElementById('particle-canvas');
     const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    const hero = document.querySelector('.hero');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let particles = [];
+    let running = true;
 
-    let particlesArray;
-
-    class Particle {
-        constructor(x, y, directionX, directionY, size, color) {
-            this.x = x;
-            this.y = y;
-            this.directionX = directionX;
-            this.directionY = directionY;
-            this.size = size;
-            this.color = color;
-        }
-
-        draw() {
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
-            ctx.fillStyle = 'rgba(0, 191, 255, 0.3)';
-            ctx.fill();
-        }
-
-        update() {
-            if (this.x > canvas.width || this.x < 0) {
-                this.directionX = -this.directionX;
-            }
-            if (this.y > canvas.height || this.y < 0) {
-                this.directionY = -this.directionY;
-            }
-            this.x += this.directionX;
-            this.y += this.directionY;
-            this.draw();
-        }
+    function size() {
+        canvas.width = hero.clientWidth;
+        canvas.height = hero.clientHeight;
     }
 
     function init() {
-        particlesArray = [];
-        let numberOfParticles = (canvas.height * canvas.width) / 9000;
-        for (let i = 0; i < numberOfParticles; i++) {
-            let size = (Math.random() * 2) + 1;
-            let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
-            let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
-            let directionX = (Math.random() * 0.4) - 0.2;
-            let directionY = (Math.random() * 0.4) - 0.2;
-            particlesArray.push(new Particle(x, y, directionX, directionY, size));
+        size();
+        particles = [];
+        const count = Math.min(160, (canvas.width * canvas.height) / 9000);
+        for (let i = 0; i < count; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                dx: Math.random() * 0.4 - 0.2,
+                dy: Math.random() * 0.4 - 0.2,
+                r: Math.random() * 2 + 1
+            });
         }
     }
 
-    function animate() {
-        requestAnimationFrame(animate);
-        ctx.clearRect(0, 0, innerWidth, innerHeight);
-        for (let i = 0; i < particlesArray.length; i++) {
-            particlesArray[i].update();
+    function frame() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const maxDist = (canvas.width / 7) * (canvas.height / 7);
+        for (const p of particles) {
+            if (p.x > canvas.width || p.x < 0) p.dx = -p.dx;
+            if (p.y > canvas.height || p.y < 0) p.dy = -p.dy;
+            if (!reduceMotion) { p.x += p.dx; p.y += p.dy; }
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0, 191, 255, 0.3)';
+            ctx.fill();
         }
-        connect();
-    }
-
-    function connect() {
-        let opacityValue = 1;
-        for (let a = 0; a < particlesArray.length; a++) {
-            for (let b = a; b < particlesArray.length; b++) {
-                let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x))
-                    + ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
-                if (distance < (canvas.width / 7) * (canvas.height / 7)) {
-                    opacityValue = 1 - (distance / 20000);
-                    ctx.strokeStyle = 'rgba(0, 191, 255,' + opacityValue + ')';
+        for (let a = 0; a < particles.length; a++) {
+            for (let b = a + 1; b < particles.length; b++) {
+                const dx = particles[a].x - particles[b].x, dy = particles[a].y - particles[b].y;
+                const d = dx * dx + dy * dy;
+                if (d < maxDist) {
+                    const o = 1 - d / 20000;
+                    if (o <= 0) continue;
+                    ctx.strokeStyle = 'rgba(0, 191, 255,' + o + ')';
                     ctx.lineWidth = 1;
                     ctx.beginPath();
-                    ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
-                    ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                    ctx.moveTo(particles[a].x, particles[a].y);
+                    ctx.lineTo(particles[b].x, particles[b].y);
                     ctx.stroke();
                 }
             }
         }
+        if (running && !reduceMotion) requestAnimationFrame(frame);
     }
 
-    window.addEventListener('resize', () => {
-            canvas.width = innerWidth;
-            canvas.height = innerHeight;
-            init();
-        }
-    );
+    // Pause the animation when the hero is off screen
+    new IntersectionObserver(([e]) => {
+        const was = running;
+        running = e.isIntersecting;
+        if (running && !was && !reduceMotion) requestAnimationFrame(frame);
+    }).observe(hero);
 
+    window.addEventListener('resize', init);
     init();
-    animate();
+    frame();
 </script>
 
 </body>
 </html>
-
-
